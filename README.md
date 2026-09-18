@@ -224,4 +224,3 @@ curl -X GET http://localhost:5000/api/auth/profile \
 Built with 💙 for **AVIP 2026** · [B.Y.T.E by Arithmatrix](https://www.linkedin.com/)
 
 </div>
-
