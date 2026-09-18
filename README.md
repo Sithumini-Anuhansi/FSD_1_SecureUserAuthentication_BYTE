@@ -22,19 +22,19 @@ A full-stack MERN application implementing registration, login, hashed password 
 
 ## 📋 Table of Contents
 
-* [Tech Stack](#-tech-stack)
-* [Features](#-features)
-* [Project Structure](#-project-structure)
-* [Setup Instructions](#-setup-instructions)
-* [API Endpoints](#-api-endpoints)
-* [HTTP Status Codes](#-http-status-codes-used)
-* [Security Notes](#-security-notes)
-* [Demo / Screenshots](#-demo--screenshots)
-* [Deployment](#-deployment-per-avip-guide)
+* [Tech Stack](#tech-stack)
+* [Features](#features)
+* [Project Structure](#project-structure)
+* [Setup Instructions](#setup-instructions)
+* [API Endpoints](#api-endpoints)
+* [HTTP Status Codes](#http-status-codes)
+* [Security Notes](#security-notes)
+* [Screenshots](#screenshots)
+* [Deployment](#deployment)
 
 ---
 
-## 🛠️ Tech Stack
+## <a id="tech-stack"></a>🛠️ Tech Stack
 
 |Layer|Technology|
 |-|-|
@@ -42,7 +42,7 @@ A full-stack MERN application implementing registration, login, hashed password 
 |**Backend**|Node.js · Express.js · JWT · bcryptjs · express-validator|
 |**Database**|MongoDB (Mongoose)|
 
-## ✨ Features
+## <a id="features"></a>✨ Features
 
 * ✅ User registration with server-side validation
 * 🔑 Login with JWT session tokens
@@ -50,7 +50,7 @@ A full-stack MERN application implementing registration, login, hashed password 
 * 🛡️ Protected route that only responds with valid, unexpired JWTs
 * ⚠️ Consistent error handling with proper HTTP status codes
 
-## 📁 Project Structure
+## <a id="project-structure"></a>📁 Project Structure
 
 ```
 FSD\_1\_SecureUserAuthentication\_BYTE/
@@ -77,7 +77,7 @@ FSD\_1\_SecureUserAuthentication\_BYTE/
     └── .env.example
 ```
 
-## 🚀 Setup Instructions
+## <a id="setup-instructions"></a>🚀 Setup Instructions
 
 ### 1. Backend
 
@@ -85,7 +85,7 @@ FSD\_1\_SecureUserAuthentication\_BYTE/
 cd backend
 npm install
 cp .env.example .env
-# Edit .env: set MONGO\_URI (MongoDB Atlas or local) and a strong JWT\_SECRET
+# Edit .env: set `MONGO_URI` (MongoDB Atlas or local) and a strong `JWT_SECRET`
 npm run dev
 ```
 
@@ -102,7 +102,7 @@ npm run dev
 
 Frontend runs at `http://localhost:5173`.
 
-## 🔌 API Endpoints
+## <a id="api-endpoints"></a>🔌 API Endpoints
 
 |Method|Endpoint|Access|Description|
 |-|-|-|-|
@@ -149,7 +149,7 @@ Content-Type: application/json
 ### Example Authenticated Request (Protected Endpoint)
 
 ```bash
-curl -X GET http://localhost:5000/api/auth/profile \\
+curl -X GET http://localhost:5000/api/auth/profile \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIs..."
 ```
 
@@ -173,7 +173,7 @@ curl -X GET http://localhost:5000/api/auth/profile \\
 { "success": false, "message": "Not authorized, no token provided" }
 ```
 
-## 📊 HTTP Status Codes Used
+## <a id="http-status-codes"></a>📊 HTTP Status Codes Used
 
 |Code|Meaning|
 |-|-|
@@ -185,14 +185,14 @@ curl -X GET http://localhost:5000/api/auth/profile \\
 |409|♻️ Email already registered|
 |500|💥 Server error|
 
-## 🔒 Security Notes
+## <a id="security-notes"></a>🔒 Security Notes
 
 * Passwords are hashed with **bcrypt** (10 salt rounds) before being saved — the raw password is never stored or logged.
 * The `password` field uses Mongoose's `select: false` so it is never returned in API responses by default.
-* JWTs are signed with a server-side secret and expire after 1 day (configurable via `JWT\_EXPIRES\_IN`).
+* JWTs are signed with a server-side secret and expire after 1 day (configurable via `JWT_EXPIRES_IN`).
 * All input is validated server-side with `express-validator` before it touches the database.
 
-## 📸 Demo / Screenshots
+## <a id="screenshots"></a>📸 Screenshots
 
 <div align="center">
 
@@ -211,13 +211,11 @@ curl -X GET http://localhost:5000/api/auth/profile \\
 
 </div>
 
-
-
-## ☁️ Deployment (per AVIP guide)
+## <a id="deployment"></a> ☁️ Deployment (per AVIP guide)
 
 1. Push this repo to GitHub as **`FSD\_1\_SecureUserAuthentication\_BYTE`** (public).
 2. Deploy `backend/` to **Render** (Node service) with the environment variables from `.env.example`.
-3. Deploy `frontend/` to **Vercel**, setting `VITE\_API\_URL` to your live Render backend URL.
+3. Deploy `frontend/` to **Vercel**, setting `VITE_API_URL` to your live Render backend URL.
 
 ---
 
