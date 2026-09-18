@@ -196,13 +196,17 @@ curl -X GET http://localhost:5000/api/auth/profile \\
 
 <div align="center">
 
-**Registration**
+<h3>Registration</h3>
 <img src="screenshots/register.png" alt="Registration form" width="700"/>
 
-**Login**
+<br/><br/>
+
+<h3>Login</h3>
 <img src="screenshots/login.png" alt="Login form" width="700"/>
 
-**Protected Dashboard**
+<br/><br/>
+
+<h3>Protected Dashboard</h3>
 <img src="screenshots/dashboard.png" alt="Protected dashboard showing JWT-authenticated profile data" width="700"/>
 
 </div>
