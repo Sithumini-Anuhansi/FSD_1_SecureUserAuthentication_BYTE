@@ -6,13 +6,13 @@
 
 **AVIP 2026 — Full Stack Development, Task 1**
 
-[!\[Node.js](https://img.shields.io/badge/Node.js-339933?style=flat\&logo=node.js\&logoColor=white)](https://nodejs.org/)
-[!\[Express](https://img.shields.io/badge/Express-000000?style=flat\&logo=express\&logoColor=white)](https://expressjs.com/)
-[!\[MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=flat\&logo=mongodb\&logoColor=white)](https://www.mongodb.com/)
-[!\[React](https://img.shields.io/badge/React-61DAFB?style=flat\&logo=react\&logoColor=black)](https://react.dev/)
-[!\[Vite](https://img.shields.io/badge/Vite-646CFF?style=flat\&logo=vite\&logoColor=white)](https://vitejs.dev/)
-[!\[JWT](https://img.shields.io/badge/JWT-black?style=flat\&logo=JSON%20web%20tokens)](https://jwt.io/)
-[!\[License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](#)
+[![Node.js](https://img.shields.io/badge/Node.js-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
+[![Express](https://img.shields.io/badge/Express-000000?logo=express&logoColor=white)](https://expressjs.com/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-47A248?logo=mongodb&logoColor=white)](https://www.mongodb.com/)
+[![React](https://img.shields.io/badge/React-61DAFB?logo=react&logoColor=black)](https://react.dev/)
+[![Vite](https://img.shields.io/badge/Vite-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
+[![JWT](https://img.shields.io/badge/JWT-000000?logo=jsonwebtokens&logoColor=white)](https://jwt.io/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](#)
 
 A full-stack MERN application implementing registration, login, hashed password storage, JWT-based session handling, and a protected route that only returns data to an authenticated user.
 
