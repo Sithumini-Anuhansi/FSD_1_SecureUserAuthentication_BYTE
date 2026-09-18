@@ -1,10 +1,8 @@
 <div align="center">
 
-# 🔐 FSD\_1\_SecureUserAuthentication\_BYTE
+# 🔐 Secure User Authentication
 
-### Secure User Authentication System
-
-**AVIP 2026 — Full Stack Development, Task 1**
+### Full Stack Development
 
 [![Node.js](https://img.shields.io/badge/Node.js-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
 [![Express](https://img.shields.io/badge/Express-000000?logo=express&logoColor=white)](https://expressjs.com/)
@@ -53,7 +51,7 @@ A full-stack MERN application implementing registration, login, hashed password 
 ## <a id="project-structure"></a>📁 Project Structure
 
 ```
-FSD\_1\_SecureUserAuthentication\_BYTE/
+Secure-User-Authentication
 ├── backend/
 │   ├── config/db.js
 │   ├── models/User.js
@@ -211,9 +209,9 @@ curl -X GET http://localhost:5000/api/auth/profile \
 
 </div>
 
-## <a id="deployment"></a> ☁️ Deployment (per AVIP guide)
+## <a id="deployment"></a> ☁️ Deployment
 
-1. Push this repo to GitHub as **`FSD\_1\_SecureUserAuthentication\_BYTE`** (public).
+1. Push this repo to GitHub as **`Secure-User-Authentication`** (public).
 2. Deploy `backend/` to **Render** (Node service) with the environment variables from `.env.example`.
 3. Deploy `frontend/` to **Vercel**, setting `VITE_API_URL` to your live Render backend URL.
 
@@ -221,6 +219,9 @@ curl -X GET http://localhost:5000/api/auth/profile \
 
 <div align="center">
 
-Built with 💙 for **AVIP 2026** · [B.Y.T.E by Arithmatrix](https://www.linkedin.com/)
+## 🤝 Connect & Contact
+
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=flat-square&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/sithumini-anuhansi-5b32a8334)
+[![Email](https://img.shields.io/badge/Email-D14836?style=flat-square&logo=gmail&logoColor=white)](mailto:anuhansisithumini@gmail.com)
 
 </div>
