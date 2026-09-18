@@ -18,7 +18,7 @@ A full-stack MERN application implementing registration, login, hashed password 
 
 </div>
 
-\---
+---
 
 ## 📋 Table of Contents
 
@@ -32,7 +32,7 @@ A full-stack MERN application implementing registration, login, hashed password 
 * [Demo / Screenshots](#-demo--screenshots)
 * [Deployment](#-deployment-per-avip-guide)
 
-\---
+---
 
 ## 🛠️ Tech Stack
 
@@ -79,7 +79,7 @@ FSD\_1\_SecureUserAuthentication\_BYTE/
 
 ## 🚀 Setup Instructions
 
-### 1\. Backend
+### 1. Backend
 
 ```bash
 cd backend
@@ -91,7 +91,7 @@ npm run dev
 
 Backend runs at `http://localhost:5000`.
 
-### 2\. Frontend
+### 2. Frontend
 
 ```bash
 cd frontend
@@ -196,12 +196,12 @@ curl -X GET http://localhost:5000/api/auth/profile \\
 
 <div align="center">
 
-<h3>Registration</h3>
+<h3>Registration Page</h3>
 <img src="screenshots/register.png" alt="Registration form" width="700"/>
 
 <br/><br/>
 
-<h3>Login</h3>
+<h3>Login Page</h3>
 <img src="screenshots/login.png" alt="Login form" width="700"/>
 
 <br/><br/>
@@ -219,7 +219,7 @@ curl -X GET http://localhost:5000/api/auth/profile \\
 2. Deploy `backend/` to **Render** (Node service) with the environment variables from `.env.example`.
 3. Deploy `frontend/` to **Vercel**, setting `VITE\_API\_URL` to your live Render backend URL.
 
-\---
+---
 
 <div align="center">
 
