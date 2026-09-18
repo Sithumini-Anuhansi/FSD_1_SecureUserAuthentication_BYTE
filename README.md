@@ -12,7 +12,7 @@
 [![JWT](https://img.shields.io/badge/JWT-000000?logo=jsonwebtokens&logoColor=white)](https://jwt.io/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](#)
 
-A full-stack MERN application implementing registration, login, hashed password storage, JWT-based session handling, and a protected route that only returns data to an authenticated user.
+A full-stack MERN application implementing registration, login, hashed password storage, JWT-based session handling,  account lockout, password reset, email verification, and a protected route that only returns data to an authenticated user.
 
 </div>
 
@@ -24,8 +24,12 @@ A full-stack MERN application implementing registration, login, hashed password 
 * [Features](#features)
 * [Project Structure](#project-structure)
 * [Setup Instructions](#setup-instructions)
+* [Running with Docker](#running-with-docker)
 * [API Endpoints](#api-endpoints)
 * [HTTP Status Codes](#http-status-codes)
+* [API Docs & Postman](#api-docs--postman)
+* [Testing](#testing)
+* [CI/CD](#cicd)
 * [Security Notes](#security-notes)
 * [Screenshots](#screenshots)
 * [Deployment](#deployment)
@@ -37,29 +41,52 @@ A full-stack MERN application implementing registration, login, hashed password 
 |Layer|Technology|
 |-|-|
 |**Frontend**|React.js · Vite · React Router · Axios|
-|**Backend**|Node.js · Express.js · JWT · bcryptjs · express-validator|
+|**Backend**|Node.js · Express.js · JWT · bcryptjs · express-validator · helmet · morgan|
 |**Database**|MongoDB (Mongoose)|
+|**Testing**|Jest · Supertest · mongodb-memory-server|
+|**Docs**|Swagger/OpenAPI · Postman|
+|**DevOps**|Docker · docker-compose · GitHub Actions CLI|
 
 ## <a id="features"></a>✨ Features
 
 * ✅ User registration with server-side validation
-* 🔑 Login with JWT session tokens
+* 🔑 Access + refresh token session handling (15-min access token, 7-day rotating refresh token) — not a single long-lived JWT
 * 🔒 Passwords hashed with bcrypt — never stored or returned in plain text
-* 🛡️ Protected route that only responds with valid, unexpired JWTs
+* 🛡️ Protected route that only responds with valid, unexpired, non-blacklisted JWTs
+* 🚪 Server-side logout — blacklists the access token and revokes the refresh token, not just a client-side clear
+* 🔁 Password reset flow — forgot-password → emailed (mocked) reset link → reset
+* ✉️ Email verification on registration (mocked email, logged to server console)
+* 🔐 Account lockout after 5 failed login attempts (15-minute cooldown)
+* 🚫 Rate limiting on `/login` (10 attempts / 15 min / IP) plus a general API limiter
+* 🪖 `helmet` security headers + `morgan` request logging
 * ⚠️ Consistent error handling with proper HTTP status codes
+* 🧪 Automated Jest/Supertest test suite
+* 📘 Swagger UI + Postman collection for exploring the API
 
 ## <a id="project-structure"></a>📁 Project Structure
 
 ```
 Secure-User-Authentication
+├── .github/workflows/ci.yml
+├── docker-compose.yml
 ├── backend/
 │   ├── config/db.js
 │   ├── models/User.js
+│   ├── models/TokenBlacklist.js
 │   ├── middleware/auth.js
 │   ├── middleware/errorHandler.js
+│   ├── middleware/rateLimiters.js
 │   ├── controllers/authController.js
 │   ├── routes/authRoutes.js
+│   ├── utils/tokens.js
+│   ├── utils/sendEmail.js
+│   ├── tests/setup.js
+│   ├── tests/auth.test.js
+│   ├── postman/Secure-User-Authentication.postman_collection.json
+│   ├── swagger.yaml
+│   ├── app.js
 │   ├── server.js
+│   ├── Dockerfile
 │   ├── package.json
 │   └── .env.example
 └── frontend/
@@ -69,6 +96,9 @@ Secure-User-Authentication
     │   ├── pages/Login.jsx
     │   ├── pages/Register.jsx
     │   ├── pages/Dashboard.jsx
+    │   ├── pages/ForgotPassword.jsx
+    │   ├── pages/ResetPassword.jsx
+    │   ├── pages/VerifyEmail.jsx
     │   ├── App.jsx
     │   └── main.jsx
     ├── package.json
@@ -83,11 +113,13 @@ Secure-User-Authentication
 cd backend
 npm install
 cp .env.example .env
-# Edit .env: set `MONGO_URI` (MongoDB Atlas or local) and a strong `JWT_SECRET`
+# Edit .env: set `MONGO_URI` (MongoDB Atlas or local), `JWT_SECRET`, and `REFRESH_TOKEN_SECRET`
+# (use two DIFFERENT long random strings for the two secrets)
 npm run dev
 ```
 
-Backend runs at `http://localhost:5000`.
+Backend runs at `http://localhost:5000`. 
+Swagger docs at `http://localhost:5000/api-docs`.
 
 ### 2. Frontend
 
@@ -100,13 +132,31 @@ npm run dev
 
 Frontend runs at `http://localhost:5173`.
 
+## <a id="running-with-docker"></a>🐳 Running with Docker
+
+A `docker-compose.yml` at the repo root spins up the backend and a MongoDB instance together — no local Mongo install needed.
+```bash
+# From the repo root, create a .env with your two secrets:
+echo "JWT_SECRET=your_long_random_secret" >> .env
+echo "REFRESH_TOKEN_SECRET=your_other_long_random_secret" >> .env
+
+docker compose up --build
+```
+
+This builds the backend image from `backend/Dockerfile`, starts a `mongo:7` container, and connects them on an internal Docker network. The API is available at `http://localhost:5000`. Run the frontend separately with `npm run dev` (it talks to the containerized backend over `VITE_API_URL`).
+
 ## <a id="api-endpoints"></a>🔌 API Endpoints
 
 |Method|Endpoint|Access|Description|
 |-|-|-|-|
-|POST|`/api/auth/register`|🌐 Public|Register a new user|
-|POST|`/api/auth/login`|🌐 Public|Log in and receive a JWT|
-|GET|`/api/auth/profile`|🔒 Protected|Returns the logged-in user's data (requires `Authorization: Bearer <token>`)|
+|POST|`/api/auth/register`|🌐 Public|Register a new user, sends a (mocked) verification email|
+|GET|`/api/auth/verify-email/:token`|🌐 Public|Verify email using the token from the verification email|
+|POST|`/api/auth/login`|🌐 Public 🚫 Rate-limited|Log in, returns an access + refresh token pair|
+|POST|`/api/auth/refresh`|🌐 Public|Exchange a valid refresh token for a new token pair|
+|POST|`/api/auth/logout`|🔒 Protected|Blacklists the access token, revokes the refresh token|
+|POST|`/api/auth/forgot-password`|🌐 Public|Request a password reset link (mocked email)|
+|POST|`/api/auth/reset-password/:token`|🌐 Public|Reset password using the token from the reset email|
+|GET|`/api/auth/profile`|🔒 Protected|Returns the logged-in user's data|
 
 ### Register — Request
 
@@ -126,9 +176,10 @@ Content-Type: application/json
 ```json
 {
   "success": true,
-  "message": "User registered successfully",
-  "token": "eyJhbGciOiJIUzI1NiIs...",
-  "user": { "id": "665f1...", "name": "Jane Doe", "email": "jane@example.com" }
+  "message": "User registered successfully. Check your email (mocked - see server logs) to verify your account.",
+  "accessToken": "eyJhbGciOiJIUzI1NiIs...",
+  "refreshToken": "eyJhbGciOiJIUzI1NiIs...",
+  "user": { "id": "665f1...", "name": "Jane Doe", "email": "jane@example.com", "isVerified": false }
 }
 ```
 
@@ -160,6 +211,7 @@ curl -X GET http://localhost:5000/api/auth/profile \
     "_id": "665f1...",
     "name": "Jane Doe",
     "email": "jane@example.com",
+    "isVerified": false,
     "createdAt": "2026-09-18T10:12:00.000Z"
   }
 }
@@ -170,24 +222,73 @@ curl -X GET http://localhost:5000/api/auth/profile \
 ```json
 { "success": false, "message": "Not authorized, no token provided" }
 ```
+### Refreshing an Expired Access Token
+
+```bash
+curl -X POST http://localhost:5000/api/auth/refresh \
+  -H "Content-Type: application/json" \
+  -d '{ "refreshToken": "eyJhbGciOiJIUzI1NiIs..." }'
+```
+
+### Logging Out
+
+```bash
+curl -X POST http://localhost:5000/api/auth/logout \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIs..." \
+  -H "Content-Type: application/json" \
+  -d '{ "refreshToken": "eyJhbGciOiJIUzI1NiIs..." }'
+```
+After this, the same access token will return `401` on `/api/auth/profile` even though it hasn't naturally expired yet — it's been blacklisted server-side.
 
 ## <a id="http-status-codes"></a>📊 HTTP Status Codes Used
 
 |Code|Meaning|
 |-|-|
-|200|✅ Successful login / profile fetch|
+|200|✅ Successful login / profile fetch / refresh / logout|
 |201|✅ Successful registration|
-|400|⚠️ Validation error (missing/invalid fields)|
-|401|🚫 Invalid credentials / missing or invalid token|
+|400|⚠️ Validation error, malformed request, or invalid/expired reset & verification tokens|
+|401|🚫 Invalid credentials, missing/invalid/revoked token, or expired refresh token|
 |404|🔍 Route not found|
 |409|♻️ Email already registered|
+|423|🔒 Account locked due to too many failed login attempts|
+|429|🐢 Rate limited (too many login attempts from this IP)|
 |500|💥 Server error|
+
+## <a id="api-docs--postman"></a>📘 API Docs & Postman
+
+* **Swagger/OpenAPI** — once the backend is running, open `http://localhost:5000/api-docs` for interactive docs (spec lives at `backend/swagger.yaml`).
+* **Postman** — import `backend/postman/Secure-User-Authentication.postman_collection.json`. It auto-captures the access/refresh tokens from Register/Login into collection variables so you can immediately try the protected requests without copy-pasting tokens.
+
+## <a id="testing"></a>🧪 Testing
+
+```bash
+cd backend
+npm test
+```
+
+The suite uses **Jest + Supertest** against an **in-memory MongoDB** (`mongodb-memory-server`), so it needs no real database and is safe to run in CI. Coverage includes:
+* Register — happy path (201, tokens returned) and failure cases (duplicate email, invalid email).
+* Login — happy path (200, tokens returned) and failure cases (wrong password, unknown email).
+* Protected profile route — happy path with a valid token, and 401 with no/invalid token.
+* Logout — confirms a blacklisted access token is rejected on the next request.
+* Refresh — happy path issuing a new token pair, and failure with an invalid refresh token.
+
+## <a id="cicd"></a>⚙️ CI/CD
+
+`.github/workflows/ci.yml` runs on every push/PR to `main`:
+* **Backend job** — `npm install`, `npm run lint`, `npm test` (against the in-memory DB, no secrets needed)
+* **Frontend job** — `npm install`, `npm run build`
+
+Check the Actions tab on GitHub after pushing to see it run.
 
 ## <a id="security-notes"></a>🔒 Security Notes
 
-* Passwords are hashed with **bcrypt** (10 salt rounds) before being saved — the raw password is never stored or logged.
+* Passwords are hashed with bcrypt (10 salt rounds) before being saved — the raw password is never stored or logged.
 * The `password` field uses Mongoose's `select: false` so it is never returned in API responses by default.
-* JWTs are signed with a server-side secret and expire after 1 day (configurable via `JWT_EXPIRES_IN`).
+* Access tokens are short-lived (15 min); refresh tokens are longer-lived (7 days), signed with a separate secret, stored per-user, and rotated on every use.
+* Logging out blacklists the access token server-side (TTL-indexed collection, auto-cleaned) and removes the refresh token — a stolen access token can't be replayed after logout.
+* 5 failed login attempts locks the account for 15 minutes; `/login` is additionally rate-limited per IP.
+* `helmet` sets standard security headers; a general rate limiter guards the whole API.
 * All input is validated server-side with `express-validator` before it touches the database.
 
 ## <a id="screenshots"></a>📸 Screenshots
@@ -212,8 +313,9 @@ curl -X GET http://localhost:5000/api/auth/profile \
 ## <a id="deployment"></a> ☁️ Deployment
 
 1. Push this repo to GitHub as **`Secure-User-Authentication`** (public).
-2. Deploy `backend/` to **Render** (Node service) with the environment variables from `.env.example`.
+2. Deploy `backend/` to **Render** (Node service) with the environment variables from `.env.example` — or deploy the `backend/Dockerfile` directly as a Render Docker service.
 3. Deploy `frontend/` to **Vercel**, setting `VITE_API_URL` to your live Render backend URL.
+4. Add the same environment variables as GitHub Actions secrets if you want CI to run integration tests against a real database in future.
 
 ---
 
