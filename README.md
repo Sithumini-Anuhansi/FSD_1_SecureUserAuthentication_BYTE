@@ -159,7 +159,7 @@ curl -X GET http://localhost:5000/api/auth/profile \\
 {
   "success": true,
   "user": {
-    "\_id": "665f1...",
+    "_id": "665f1...",
     "name": "Jane Doe",
     "email": "jane@example.com",
     "createdAt": "2026-09-18T10:12:00.000Z"
